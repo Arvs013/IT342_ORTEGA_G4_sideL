@@ -1,4 +1,10 @@
 package com.example.backend.repository;
 
-public class userRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.backend.entity.UserEntity;
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<UserRepository, Integer> {
+    Optional<UserRepository> findByEmail(String email);
+    boolean existsByEmail(String email);
 }

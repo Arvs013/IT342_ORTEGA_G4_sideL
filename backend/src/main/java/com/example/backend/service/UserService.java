@@ -1,4 +1,11 @@
 package com.example.backend.service;
 
-public class userService {
+import com.example.backend.entity.UserEntity;
+
+import java.util.List;
+
+public interface UserService {
+    List<UserEntity> getAllUsers();
+    UserEntity getUserById(Integer id);
 }
+

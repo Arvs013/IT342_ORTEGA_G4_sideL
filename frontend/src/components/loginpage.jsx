@@ -8,6 +8,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,17 +29,20 @@ const LoginPage = () => {
     try {
       const response = await fetch("http://localhost:8080/api/users/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorMsg = await response.text();
-        throw new Error(errorMsg || "Invalid email or password");
+        throw new Error(data.message || "Invalid email or password");
       }
 
-      const userData = await response.json();
-      localStorage.setItem("loggedUser", JSON.stringify(userData));
+      localStorage.setItem("loggedUser", JSON.stringify(data));
+
       navigate("/dashboard");
 
     } catch (err) {
@@ -80,18 +84,13 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button
-            type="submit"
-            className="login-btn"
-            disabled={loading}
-          >
+          <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <p className="terms-text">
-          By clicking Sign in, you agree to our{" "}
-          <a href="#">Terms, Privacy Policy</a> and <a href="#">Cookies Policy</a>.
+          By clicking Sign in, you agree to our Terms, Privacy Policy and Cookies Policy.
         </p>
 
         <p className="footer-text">

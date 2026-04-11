@@ -1,8 +1,8 @@
 package com.example.backend.controller;
 
-import org.springframework.web.bind.annotation.*;
-import com.example.backend.service.UserService;
 import com.example.backend.entity.UserEntity;
+import com.example.backend.service.UserService;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,8 +26,16 @@ public class UserController {
     public UserEntity getById(@PathVariable Integer id) {
         return service.getUserById(id);
     }
-    @PostMapping
-    public UserEntity createUser(@RequestBody UserEntity user) {
+
+    // REGISTER
+    @PostMapping("/register")
+    public UserEntity register(@RequestBody UserEntity user) {
         return service.saveUser(user);
+    }
+
+    // LOGIN
+    @PostMapping("/login")
+    public UserEntity login(@RequestBody UserEntity user) {
+        return service.login(user.getEmail(), user.getPassword());
     }
 }

@@ -4,7 +4,8 @@ import "../styles/SignupPage.css";
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const API_BASE_URL = "http://localhost:8080/api/users"; // Your backend endpoint
+
+  const API_BASE_URL = "http://localhost:8080/api/users/register";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -24,58 +25,67 @@ const SignupPage = () => {
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSignup = async () => {
-  if (loading) return;
+  const handleSignup = async (e) => {
+    e.preventDefault();
 
-  if (!formData.name || !formData.email || !formData.password) {
-    setError("Please fill name, email, and password.");
-    return;
-  }
+    if (loading) return;
 
-  setError("");
-  setSuccess("");
-
-  try {
-    setLoading(true);
-
-    const [firstname, ...rest] = formData.name.split(" ");
-    const lastname = rest.join(" ");
-
-    const payload = {
-      firstname: firstname || "",
-      lastname: lastname || "",
-      email: formData.email,
-      password: formData.password,
-    };
-
-    const response = await fetch(API_BASE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error("Signup failed. Please try again.");
+    if (!formData.name || !formData.email || !formData.password) {
+      setError("Please fill name, email, and password.");
+      return;
     }
 
-    const data = await response.json();
-    setSuccess("Account created successfully!");
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
-    localStorage.setItem("loggedUser", JSON.stringify(data));
+    try {
+      const [firstname, ...rest] = formData.name.split(" ");
+      const lastname = rest.join(" ");
 
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 1000);
+      const payload = {
+        firstname: firstname || "",
+        lastname: lastname || "",
+        email: formData.email,
+        password: formData.password,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+      };
 
-  } catch (err) {
-    setError(err.message || "An error occurred during signup.");
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await fetch(API_BASE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
+      setSuccess("Account created successfully!");
+
+      localStorage.setItem("loggedUser", JSON.stringify(data));
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+
+    } catch (err) {
+      setError(err.message || "An error occurred during signup.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={`signup-container ${isLoaded ? "loaded" : ""}`}>
@@ -98,37 +108,57 @@ const SignupPage = () => {
         {success && <p className="success-message">{success}</p>}
 
         <div className="form-group">
-          {["name", "email", "password", "phoneNumber", "address"].map((field) => (
-            <input
-              key={field}
-              type={field === "password" ? "password" : "text"}
-              name={field}
-              placeholder={field.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())}
-              value={formData[field]}
-              onChange={handleChange}
-              className="input-box"
-            />
-          ))}
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="phoneNumber"
+            placeholder="Phone Number"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            value={formData.address}
+            onChange={handleChange}
+          />
         </div>
 
-        <button
-          className="email-btn"
-          onClick={handleSignup}
-          disabled={loading}
-        >
+        <button onClick={handleSignup} disabled={loading}>
           {loading ? "Signing Up..." : "Sign Up"}
         </button>
 
         <p className="terms-text">
-          By clicking "Sign up", you agree to our{" "}
-          <Link to="/terms">Terms</Link>,{" "}
-          <Link to="/privacy">Privacy Policy</Link> and{" "}
-          <Link to="/cookies">Cookies Policy</Link>.
+          By clicking "Sign up", you agree to our Terms, Privacy Policy and Cookies Policy.
         </p>
 
         <p className="footer-text">
-          Already have an account?{" "}
-          <Link to="/login" className="signup-link">Log in</Link>
+          Already have an account? <Link to="/login">Log in</Link>
         </p>
 
       </div>

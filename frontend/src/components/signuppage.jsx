@@ -28,44 +28,54 @@ const SignupPage = () => {
   };
 
   const handleSignup = async () => {
-    if (loading) return;
+  if (loading) return;
 
-    if (!formData.name || !formData.email || !formData.password) {
-      setError("Please fill name, email, and password.");
-      return;
+  if (!formData.name || !formData.email || !formData.password) {
+    setError("Please fill name, email, and password.");
+    return;
+  }
+
+  setError("");
+  setSuccess("");
+
+  try {
+    setLoading(true);
+
+    const [firstname, ...rest] = formData.name.split(" ");
+    const lastname = rest.join(" ");
+
+    const payload = {
+      firstname: firstname || "",
+      lastname: lastname || "",
+      email: formData.email,
+      password: formData.password,
+    };
+
+    const response = await fetch(API_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Signup failed. Please try again.");
     }
 
-    setError("");
-    setSuccess("");
+    const data = await response.json();
+    setSuccess("Account created successfully!");
 
-    try {
-      setLoading(true);
+    localStorage.setItem("loggedUser", JSON.stringify(data));
 
-      const response = await fetch(API_BASE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1000);
 
-      if (!response.ok) {
-        throw new Error("Signup failed. Please try again.");
-      }
-
-      const data = await response.json();
-      setSuccess("Account created successfully!");
-
-      localStorage.setItem("loggedUser", JSON.stringify(data));
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
-
-    } catch (err) {
-      setError(err.message || "An error occurred during signup.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(err.message || "An error occurred during signup.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className={`signup-container ${isLoaded ? "loaded" : ""}`}>
